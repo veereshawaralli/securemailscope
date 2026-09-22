@@ -1,0 +1,20 @@
+# ── SecureMailScope dependencies ───────────────────────────────────────────
+# Core (REQUIRED for X.509 certificate analysis)
+cryptography>=41.0
+
+# AI/ML (recommended — framework degrades to a deterministic rule engine if absent)
+scikit-learn>=1.3
+numpy>=1.24
+joblib>=1.3
+
+# Reporting
+jinja2>=3.1
+reportlab>=4.0        # PDF export (optional)
+
+# Interactive dashboard (optional)
+fastapi>=0.110
+uvicorn>=0.29
+
+# NOTE: PCAP / Ethernet / IP / TCP / TLS parsing is implemented in pure Python
+# (securemailscope/pcapio, securemailscope/tls) — no libpcap, tshark, scapy or
+# dpkt required. This keeps the zero-credential demo runnable anywhere.

@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+out/
+models/*.joblib
+samples/pcaps/
+*.pcap
+*.log
+.env
+.DS_Store
+.pytest_cache/
+*.egg-info/
