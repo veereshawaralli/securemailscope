@@ -106,9 +106,28 @@ def _analyze_stream(stream, ml=None) -> SessionResult:
         "count": chain.count,
         "chain_complete": chain.chain_complete,
         "self_signed_leaf": chain.self_signed_leaf,
+        "self_signed_root": chain.self_signed_root,
+        "signatures_valid": chain.signatures_valid,
+        "trusted_anchor": chain.trusted_anchor,
+        "validated": chain.validated,
+        "anchor_subject": chain.anchor_subject,
+        "trust_status": chain.trust_status,
+        "trust_detail": chain.trust_detail,
         "leaf": leaf,
     }
     cert_dicts = [dataclasses.asdict(c) for c in chain.chain]
+
+    # surface chain-trust facts on the summary (named keys → safe for the
+    # fixed 18-dim feature vector, which only reads its own known fields)
+    summary["chain_len"] = chain.count
+    summary["chain_complete"] = chain.chain_complete
+    summary["chain_signatures_valid"] = chain.signatures_valid
+    summary["chain_self_signed_root"] = chain.self_signed_root
+    summary["chain_trusted_anchor"] = chain.trusted_anchor
+    summary["chain_validated"] = chain.validated
+    summary["chain_trust_status"] = chain.trust_status
+    summary["chain_trust_detail"] = chain.trust_detail
+    summary["chain_anchor"] = chain.anchor_subject
 
     findings = rules.evaluate(summary, chain_dict)
     feats = features.build(summary, leaf)
