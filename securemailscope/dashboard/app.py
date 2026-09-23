@@ -129,63 +129,130 @@ def serve(host: str = "127.0.0.1", port: int = 8000,
 _HEAD = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SecureMailScope Dashboard</title><style>
-body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0e1117;color:#e6edf3}
-header{padding:14px 20px;border-bottom:1px solid #2b3240;display:flex;justify-content:space-between;align-items:center}
-h1{font-size:17px;margin:0}.sub{color:#8b949e;font-size:12px}
-.layout{display:flex;height:calc(100vh - 62px)}
-.side{width:300px;border-right:1px solid #2b3240;padding:14px;overflow:auto}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.bar{padding:8px 14px;border-bottom:1px solid #2b3240;display:flex;gap:8px;align-items:center}
+:root{--bg:#0d1117;--bg2:#0a0e14;--panel:#161b22;--panel2:#1c2230;--line:#2b3240;
+--txt:#e6edf3;--mut:#8b949e;--brand:#1f6feb;--brand2:#388bfd;--good:#3fb950}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;
+background:var(--bg);color:var(--txt)}
+header{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;
+justify-content:space-between;align-items:center;gap:16px;
+background:linear-gradient(90deg,#10151d,#0d1117)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:9px;color:#fff;font-weight:800;font-size:16px;
+display:flex;align-items:center;justify-content:center;
+background:linear-gradient(135deg,var(--brand),#7aa2ff);box-shadow:0 2px 10px rgba(31,111,235,.45)}
+h1{font-size:17px;margin:0;letter-spacing:.2px}
+.sub{color:var(--mut);font-size:12px;margin-top:1px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;color:var(--mut);border:1px solid var(--line);background:var(--panel);
+padding:3px 9px;border-radius:20px}
+.tag b{color:var(--good)}
+.layout{display:flex;height:calc(100vh - 66px)}
+.side{width:300px;border-right:1px solid var(--line);padding:14px;overflow:auto;background:var(--bg2)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.bar{padding:9px 16px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .bar .sp{flex:1}
-button,.btn{background:#1f6feb;border:0;color:#fff;padding:7px 12px;border-radius:7px;font-size:13px;cursor:pointer;text-decoration:none}
-.btn.ghost{background:#161b22;border:1px solid #2b3240;color:#e6edf3}
-.samp{display:block;width:100%;text-align:left;background:#161b22;border:1px solid #2b3240;color:#e6edf3;padding:9px 11px;border-radius:8px;margin:7px 0;cursor:pointer}
-.samp:hover{border-color:#1f6feb}.samp small{color:#8b949e;display:block}
-iframe{flex:1;border:0;background:#0e1117;width:100%}
-.hint{color:#8b949e;font-size:12px;margin:12px 4px 4px}
+button,.btn{background:var(--brand);border:0;color:#fff;padding:7px 13px;border-radius:8px;
+font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s}
+button:hover,.btn:hover{background:var(--brand2)}
+.btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--txt)}
+.btn.ghost:hover{border-color:var(--brand)}
+.btn.dis{opacity:.4;pointer-events:none}
+.up{display:block;width:100%;text-align:center;padding:16px 12px;border:1.5px dashed #34405a;
+border-radius:11px;background:var(--panel);cursor:pointer;transition:.15s}
+.up:hover,.up.drag{border-color:var(--brand);background:var(--panel2)}
+.up b{display:block;font-size:13px}.up small{color:var(--mut)}
+.hint{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin:16px 4px 8px}
+.samp{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+color:var(--txt);padding:10px 12px;border-radius:9px;margin:7px 0;cursor:pointer;transition:.15s}
+.samp:hover{border-color:var(--brand);transform:translateX(2px)}
+.samp.active{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.samp b{font-size:13px}.samp small{color:var(--mut);display:block;margin-top:2px}
+.stage{flex:1;position:relative;min-height:0}
+iframe{position:absolute;inset:0;border:0;background:var(--bg);width:100%;height:100%}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+justify-content:center;text-align:center;padding:30px;background:var(--bg)}
+.overlay.hide{display:none}
+.spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--line);
+border-top-color:var(--brand);animation:sp .8s linear infinite;margin-bottom:14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.emphd{font-size:16px;font-weight:700;margin-bottom:6px}
+.empsub{color:var(--mut);max-width:440px;line-height:1.6}
+.emp-logo{width:56px;height:56px;border-radius:14px;margin-bottom:16px;
+background:linear-gradient(135deg,var(--brand),#7aa2ff);display:flex;align-items:center;
+justify-content:center;font-weight:800;color:#fff;font-size:24px}
+@media(max-width:760px){.side{width:200px}}
 </style></head><body>
-<header><div><h1>SecureMailScope</h1>
-<div class="sub">Passive cryptographic posture assessment &middot; local console, no authentication</div></div>
+<header>
+  <div class="brand"><div class="logo">S</div>
+    <div><h1>SecureMailScope</h1>
+    <div class="sub">Passive cryptographic posture assessment for secure email</div></div></div>
+  <div class="tags"><span class="tag"><b>&#9679;</b> passive</span>
+    <span class="tag">offline</span><span class="tag">no&nbsp;auth &middot; localhost</span></div>
 </header>
 <div class="layout"><div class="side">
-<button class="btn" id="up">Upload PCAP&hellip;</button>
-<input type="file" id="file" accept=".pcap,.pcapng" style="display:none">
-<div class="hint">Bundled samples</div><div id="list"></div>
+  <label class="up" id="up"><b>Upload a PCAP</b><small>click or drop a .pcap / .pcapng file</small></label>
+  <input type="file" id="file" accept=".pcap,.pcapng" style="display:none">
+  <div class="hint">Bundled samples</div><div id="list"></div>
 </div><div class="main">
-<div class="bar"><b id="cur">Select a capture to analyze</b><span class="sp"></span>
-<a class="btn ghost" id="dljson" target="_blank" rel="noopener">JSON</a>
-<a class="btn ghost" id="dlpdf" target="_blank" rel="noopener">PDF</a></div>
-<iframe id="rep" title="analysis report"></iframe>
+  <div class="bar"><b id="cur">No capture selected</b><span class="sp"></span>
+  <a class="btn ghost dis" id="dljson" target="_blank" rel="noopener">JSON</a>
+  <a class="btn ghost dis" id="dlpdf" target="_blank" rel="noopener">PDF</a></div>
+  <div class="stage">
+    <iframe id="rep" title="analysis report"></iframe>
+    <div class="overlay" id="empty"><div class="emp-logo">S</div>
+      <div class="emphd">Select a capture to begin</div>
+      <div class="empsub">Pick a bundled scenario from the left, or upload your own PCAP.
+      SecureMailScope reconstructs each TLS session, validates certificates and their
+      chains, and scores the cryptographic posture &mdash; entirely offline.</div></div>
+    <div class="overlay hide" id="loading"><div class="spin"></div>
+      <div class="empsub">Analyzing capture&hellip;</div></div>
+  </div>
 </div></div>"""
 _SCRIPT = r"""<script>
 const $=s=>document.querySelector(s);
+const rep=$('#rep'),empty=$('#empty'),loading=$('#loading');
+const pretty=n=>n.replace(/\.pcap[a-z]*$/i,'').replace(/^\d+[_-]?/,'')
+  .replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase())||n;
+const busy=on=>loading.classList.toggle('hide',!on);
+rep.addEventListener('load',()=>{if(rep.getAttribute('src'))busy(false);});
 function setReport(qs,label){
-  $('#rep').src='/report?'+qs+'&fmt=html';
+  empty.classList.add('hide');busy(true);
+  rep.src='/report?'+qs+'&fmt=html';
   $('#cur').textContent=label;
-  $('#dljson').href='/report?'+qs+'&fmt=json';
-  $('#dlpdf').href='/report?'+qs+'&fmt=pdf';
+  const j=$('#dljson'),p=$('#dlpdf');
+  j.href='/report?'+qs+'&fmt=json';p.href='/report?'+qs+'&fmt=pdf';
+  j.classList.remove('dis');p.classList.remove('dis');
 }
 async function loadSamples(){
   try{
     const d=await (await fetch('/api/samples')).json();
     $('#list').innerHTML=(d.samples||[]).map(s=>
-      `<button class="samp" data-rel="${encodeURIComponent(s.rel)}">${s.name}`+
-      `<small>${(s.size/1024).toFixed(1)} KiB</small></button>`).join('')
-      ||'<div class="hint">no samples — run <code>gen-samples</code> first</div>';
-    document.querySelectorAll('.samp').forEach(b=>b.onclick=()=>
-      setReport('path='+b.dataset.rel,b.textContent));
+      `<button class="samp" data-rel="${encodeURIComponent(s.rel)}" data-label="${s.name}">`+
+      `<b>${pretty(s.name)}</b><small>${s.name} &middot; ${(s.size/1024).toFixed(1)} KiB</small></button>`).join('')
+      ||'<div class="hint">no samples &mdash; run <code>gen-samples</code> first</div>';
+    document.querySelectorAll('.samp').forEach(b=>b.onclick=()=>{
+      document.querySelectorAll('.samp').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      setReport('path='+b.dataset.rel,b.dataset.label);});
   }catch(e){$('#list').innerHTML='<div class="hint">could not load samples</div>';}
 }
-$('#up').onclick=()=>$('#file').click();
-$('#file').onchange=async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  $('#cur').textContent='Uploading & analyzing '+f.name+'…';
+async function uploadFile(f){
+  if(!f) return;
+  document.querySelectorAll('.samp').forEach(x=>x.classList.remove('active'));
+  empty.classList.add('hide');busy(true);$('#cur').textContent='Uploading '+f.name+'…';
   try{
     const r=await fetch('/api/upload',{method:'POST',body:await f.arrayBuffer()});
-    if(!r.ok){$('#cur').textContent='upload failed ('+r.status+')';return;}
+    if(!r.ok){busy(false);$('#cur').textContent='upload failed ('+r.status+')';return;}
     const d=await r.json(); setReport('token='+d.token, f.name+' (uploaded)');
-  }catch(e){$('#cur').textContent='upload error';}
-};
+  }catch(e){busy(false);$('#cur').textContent='upload error';}
+}
+$('#up').onclick=()=>$('#file').click();
+$('#file').onchange=e=>uploadFile(e.target.files[0]);
+const up=$('#up');
+['dragenter','dragover'].forEach(ev=>up.addEventListener(ev,e=>{e.preventDefault();up.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>up.addEventListener(ev,e=>{e.preventDefault();up.classList.remove('drag');}));
+up.addEventListener('drop',e=>{if(e.dataTransfer.files.length)uploadFile(e.dataTransfer.files[0]);});
 loadSamples();
 </script></body></html>"""
 
