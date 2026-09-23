@@ -129,14 +129,19 @@ def serve(host: str = "127.0.0.1", port: int = 8000,
 _HEAD = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SecureMailScope Dashboard</title><style>
-:root{--bg:#0d1117;--bg2:#0a0e14;--panel:#161b22;--panel2:#1c2230;--line:#2b3240;
---txt:#e6edf3;--mut:#8b949e;--brand:#1f6feb;--brand2:#388bfd;--good:#3fb950}
+:root{--bg:#0a0f1c;--bg2:#0d1424;--panel:#121a2d;--panel2:#182339;--line:#25314b;
+--line2:#33425f;--txt:#e9eefb;--mut:#8b98b6;--dim:#5c6a89;
+--brand:#5b8cff;--brand2:#7aa2ff;--good:#3fd07f;
+--mono:ui-monospace,"Cascadia Code","JetBrains Mono","SF Mono",Consolas,monospace;
+--sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;
-background:var(--bg);color:var(--txt)}
+body{margin:0;font:14px/1.55 var(--sans);color:var(--txt);
+background:radial-gradient(1200px 600px at 15% -10%,rgba(91,140,255,.10),transparent 60%),
+radial-gradient(900px 520px at 100% 0%,rgba(55,208,214,.06),transparent 55%),var(--bg);
+background-attachment:fixed}
 header{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;
 justify-content:space-between;align-items:center;gap:16px;
-background:linear-gradient(90deg,#10151d,#0d1117)}
+background:linear-gradient(90deg,#0d1424,#0a0f1c)}
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:34px;height:34px;border-radius:9px;color:#fff;font-weight:800;font-size:16px;
 display:flex;align-items:center;justify-content:center;
