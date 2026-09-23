@@ -7,6 +7,7 @@ the certificate is still reported as present so posture scoring can proceed.
 from __future__ import annotations
 
 import os
+import warnings
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -243,10 +244,16 @@ def _load_trust_anchors() -> dict:
             pem = b""
     if not pem:
         return _ANCHORS
-    try:
-        certs = x509.load_pem_x509_certificates(pem)   # cryptography >= 39
-    except Exception:                                  # pragma: no cover
-        certs = _split_pem(pem)
+    with warnings.catch_warnings():
+        # the system root store legitimately carries a few legacy roots (e.g.
+        # non-positive serials) that trip CryptographyDeprecationWarning; those
+        # are not our certificates to fix, so silence the cosmetic parse noise
+        # while loading anchors — the parsed anchors themselves are still fine.
+        warnings.simplefilter("ignore")
+        try:
+            certs = x509.load_pem_x509_certificates(pem)   # cryptography >= 39
+        except Exception:                                  # pragma: no cover
+            certs = _split_pem(pem)
     idx: dict = {}
     for c in certs:
         idx.setdefault(c.subject.rfc4514_string(), []).append(c)
