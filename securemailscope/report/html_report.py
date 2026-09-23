@@ -48,6 +48,8 @@ border-radius:0 8px 8px 0}
 .find .t{font-weight:700} .find .ev{color:var(--mut);font-size:12px;margin-top:3px}
 .find .rec{font-size:12px;margin-top:5px} .find .refs{font-size:11px;color:var(--mut);margin-top:4px}
 .sev{font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;color:#0b0e14;margin-right:8px}
+.tb{font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;color:#0b0e14;
+text-transform:uppercase;letter-spacing:.03em}
 .rec-item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:9px 0}
 .mut{color:var(--mut)} .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
 input.search{background:var(--panel);border:1px solid var(--line);color:var(--txt);
@@ -62,6 +64,9 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 const cvar=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
 const gradeColor=g=>cvar(g)||'#8b949e';
 const sevBadge=s=>`<span class="sev" style="background:${cvar(s)}">${s}</span>`;
+const TRUST={trusted:'#3fb950','private-ca':'#2dd4bf','self-signed':'#f5d90a',
+  unanchored:'#ff8b3d',broken:'#e5484d',unverified:'#8b949e'};
+const trustBadge=st=>st?`<span class="tb" style="background:${TRUST[st]||'#8b949e'}">${esc(st)}</span>`:'';
 
 function renderHead(){
   const g=DATA.overall_grade, sc=DATA.overall_score, gz=document.getElementById('gauge');
@@ -114,11 +119,12 @@ function sessionCard(s,i){
   const tls=su.tls_present?(su.negotiated_version_name||'TLS'):'no TLS';
   const head=[`${esc(s.protocol)}:${s.server_port}`,tls,esc(su.cipher_suite_name||'')].filter(Boolean).join(' &middot; ');
   const anom=s.anomaly?`<span class="pill" style="border-color:var(--HIGH);color:var(--HIGH)">anomaly ${s.anomaly_score}</span>`:'';
+  const tb=su.chain_trust_status?trustBadge(su.chain_trust_status):'';
   return `<div class="card" data-i="${i}">
     <div class="chead" onclick="this.parentNode.classList.toggle('open')">
       <span class="badge" style="background:${gradeColor(s.grade)}">${s.grade}</span>
       <b>${head}</b><span class="sp"></span>
-      <span class="pill">risk ${esc(s.risk_label)}</span>${anom}
+      ${tb}<span class="pill">risk ${esc(s.risk_label)}</span>${anom}
       <span class="pill">${s.score}/100</span>
       <span class="pill">${fs.length} finding(s)</span>
     </div>
@@ -130,6 +136,7 @@ function sessionCard(s,i){
         <div><span>cipher</span><br>grade ${esc(su.cipher_grade)} &middot; ${su.cipher_bits||0}b &middot; PFS ${su.cipher_pfs?'yes':'no'} &middot; AEAD ${su.cipher_aead?'yes':'no'}</div>
         <div><span>SNI</span><br>${esc(su.sni||'—')}</div>
         <div><span>ML risk</span><br>${esc(su.ml_risk||'—')} ${su.ml_confidence!=null?'('+su.ml_confidence+')':''}</div>
+        ${su.chain_trust_status?`<div><span>certificate chain</span><br>${trustBadge(su.chain_trust_status)} <span class="mut">${esc(su.chain_trust_detail||'')}</span></div>`:''}
       </div>
       ${certBlock((s.certificates&&s.certificates[0])||null)}
       ${fs.length?fs.map(findingHtml).join(''):'<div class="mut">no findings at the selected severities</div>'}
