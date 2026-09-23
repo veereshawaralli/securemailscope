@@ -7,9 +7,13 @@ env/
 out/
 models/*.joblib
 samples/pcaps/
+samples/securemailscope_demo.*
 *.pcap
 *.log
 .env
 .DS_Store
 .pytest_cache/
 *.egg-info/
+build/
+dist/
+.claude/
