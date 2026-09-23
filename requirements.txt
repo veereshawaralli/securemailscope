@@ -8,8 +8,7 @@ numpy>=1.24
 joblib>=1.3
 
 # Reporting
-jinja2>=3.1
-reportlab>=4.0        # PDF export (optional)
+reportlab>=4.0        # PDF export (optional; HTML/JSON need no extra deps)
 
 # Interactive dashboard (optional)
 fastapi>=0.110
