@@ -100,10 +100,10 @@ securemailscope analyze samples/pcaps/all.pcap --out-dir out
   --------------------------------------------------------------------------
   A        100  SMTP:587         TLS 1.2   minimal     1  SMS-OK
   F          2  SMTP:25          no TLS    critical    3  SMS-AUTH-CLEARTEXT
-  F          6  IMAP:143         TLS 1.0   critical    7  SMS-CERT_EXPIRED
+  F          6  IMAP:143         TLS 1.0   high        7  SMS-CERT_EXPIRED
   C         78  POP3:995         TLS 1.2   high        1  SMS-CIPHER-RC4
   A        100  SMTP:465         TLS 1.2   minimal     1  SMS-OK
-  A        100  IMAP:993         TLS 1.3   minimal     1  SMS-CERT-ENCRYPTED
+  A        100  IMAP:993         TLS 1.3   minimal     2  SMS-CERT-ENCRYPTED
   F          2  SMTP:587         no TLS    critical    3  SMS-AUTH-CLEARTEXT
   --------------------------------------------------------------------------
   OVERALL: F (23/100) across 7 session(s)
