@@ -23,7 +23,10 @@ ships a labeled corpus so the whole pipeline runs **offline with zero setup**.
   TLS record/handshake reconstruction, all in the standard library. No
   libpcap, tshark, scapy or dpkt required — it runs anywhere Python does.
 - **Real X.509 analysis.** Key size/type, signature hash, validity window,
-  self-signed / chain-completeness checks via the `cryptography` library.
+  self-signed / chain-completeness checks via the `cryptography` library, plus
+  **cryptographic chain path-validation** — every signature link is verified
+  and the chain is matched against the local root store (trusted / private-CA /
+  self-signed / unanchored / broken).
 - **STARTTLS-aware protocol logic.** Understands SMTP/IMAP/POP3 banners,
   STARTTLS/STLS upgrades, implicit-TLS ports, and flags cleartext `AUTH`/
   `USER`/`PASS` and STARTTLS stripping/downgrade.
@@ -167,8 +170,9 @@ Combined `all.pcap` → **OVERALL F (23/100)** across 7 sessions.
    STARTTLS/STLS upgrade boundary, and flag pre-TLS cleartext credentials.
 3. **tls** — walk TLS records and handshake messages; decode the negotiated
    version and cipher suite (with weakness tags: RC4, CBC, NO_PFS, …).
-4. **certs** — parse the presented X.509 chain and tag weaknesses (key size,
-   signature hash, expiry, self-signed, incomplete chain).
+4. **certs** — parse the presented X.509 chain, tag weaknesses (key size,
+   signature hash, expiry, self-signed, incomplete chain) and run cryptographic
+   path-validation (per-link signature checks + trust-store anchoring).
 5. **analysis** — the rules engine turns those facts into graded findings;
    posture scoring rolls them into a per-session and overall grade.
 6. **ml** — augments each session with a risk label + anomaly flag.
@@ -231,10 +235,23 @@ Certificate (`SMS-<TAG>`):
 | `VERY_WEAK_RSA_KEY` / `MD5_SIG` | CRITICAL | RSA < 1024 / MD5 signature |
 | `WEAK_RSA_KEY` / `WEAK_EC_KEY` / `SHA1_SIG` / `CERT_EXPIRED` | HIGH | Weak key/sig or expired |
 | `DSA_KEY` / `CERT_NOT_YET_VALID` / `SELF_SIGNED` / `CERT_PARSE_ERROR` | MEDIUM | — |
+| `CHAIN_SIGNATURE_INVALID` | HIGH | A chain link is not validly signed by the issuer presented above it |
 | `CERT_EXPIRING_SOON` / `CHAIN_INCOMPLETE` | LOW | Renew soon / serve intermediates |
 | `SMS-CERT-ENCRYPTED` / `SMS-CERT_NOT_ANALYZED` | INFO | TLS 1.3 encrypts cert / `cryptography` absent |
 
 `SMS-OK` (INFO) is emitted when a session has no weaknesses.
+
+Each session also carries a **chain-trust status** (shown as a colored badge in
+the HTML report and dashboard), derived from real path-validation:
+
+| Status | Meaning |
+|---|---|
+| `trusted` | Chain verifies to a root in the local trust store |
+| `private-ca` | Internally consistent chain to a self-signed (private / self-managed) root |
+| `self-signed` | Single self-signed certificate (no CA chain) |
+| `unanchored` | Signatures verify but the chain reaches no known public anchor |
+| `broken` | A certificate is not validly signed by its issuer (→ `SMS-CHAIN_SIGNATURE_INVALID`) |
+| `unverified` | Chain could not be fully verified (issuer not presented) |
 
 ---
 
@@ -302,9 +319,12 @@ scoring, recommendation de-duplication, report writers and the ML model.
 
 - TLS 1.3 encrypts the Certificate message, so certificates cannot be
   extracted passively from a 1.3 session (reported as `SMS-CERT-ENCRYPTED`).
-- Certificate *trust-chain validation against a root store* is out of scope;
-  analysis covers structure, key/signature strength, validity and
-  self-signed/completeness — not path validation to a trusted anchor.
+- Chain path-validation runs over the certificates **the server presents in
+  the capture**: signatures are verified link-by-link and the terminal root is
+  matched against the local trust store, but because the tool is passive it
+  never fetches missing intermediates (AIA) or contacts the issuer — a leaf
+  whose issuer is absent from the capture is reported as `unverified` rather
+  than chased down. Revocation (CRL/OCSP) is likewise out of scope.
 
 ## License
 
