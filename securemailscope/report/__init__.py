@@ -5,12 +5,17 @@ Each writer exposes ``write(result, path) -> path``; JSON and HTML also expose
 """
 from . import html_report, json_report
 
+import os
+
 __all__ = ["json_report", "html_report", "write"]
 
 
 def write(result, path: str, fmt: str = "json") -> str:
     """Dispatch to the writer for `fmt` in {json, html, pdf}."""
     fmt = fmt.lower()
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     if fmt == "json":
         return json_report.write(result, path)
     if fmt == "html":
