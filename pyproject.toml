@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "securemailscope"
+version = "0.1.0"
+description = "AI-assisted cryptographic security posture assessment for secure email (SMTP/IMAP/POP3) from passive PCAP captures."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "SecureMailScope contributors" }]
+keywords = ["tls", "email", "smtp", "imap", "pop3", "pcap", "x509",
+            "cryptography", "security-posture", "forensics", "ntro", "sih"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Security :: Cryptography",
+    "Topic :: System :: Networking :: Monitoring",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+]
+
+# Core dependency: real X.509 parsing / key / signature / expiry inspection.
+# Everything else degrades gracefully (see optional-dependencies below).
+dependencies = [
+    "cryptography>=41.0",
+]
+
+[project.optional-dependencies]
+# Machine-learning risk classifier + anomaly detector. Absent -> the pipeline
+# falls back to the deterministic rule-based scorer, so results are unaffected.
+ml = ["scikit-learn>=1.3", "numpy>=1.24", "joblib>=1.3"]
+# PDF report export. Absent -> JSON and HTML reports still work.
+pdf = ["reportlab>=4.0"]
+# Local interactive dashboard. Absent -> CLI report generation still works.
+dashboard = ["fastapi>=0.110", "uvicorn>=0.29"]
+# Everything, for the full end-to-end demo.
+all = ["scikit-learn>=1.3", "numpy>=1.24", "joblib>=1.3",
+       "reportlab>=4.0", "fastapi>=0.110", "uvicorn>=0.29"]
+
+[project.scripts]
+securemailscope = "securemailscope.cli:main"
+
+[project.urls]
+Repository = "https://github.com/veereshawaralli/securemailscope"
+
+[tool.setuptools.packages.find]
+include = ["securemailscope*"]
+exclude = ["tests*", "samples*", "models*"]
