@@ -70,6 +70,10 @@ _CERT_RULES = {
                           "Use a CA-issued certificate for public services.", []),
     "CHAIN_INCOMPLETE":  (LOW,  "Incomplete certificate chain",
                           "Serve the full intermediate chain.", []),
+    "CHAIN_SIGNATURE_INVALID": (HIGH, "Certificate chain signature failed to verify",
+                          "Investigate the presented chain; a certificate is not "
+                          "validly signed by its issuer (possible "
+                          "misconfiguration, corruption or interception).", [R_7525]),
     "CERT_PARSE_ERROR":  (MED,  "Certificate could not be parsed",
                           "Verify the presented DER is well-formed.", []),
     "CERT_NOT_ANALYZED": (INFO, "Certificate not analyzed",
